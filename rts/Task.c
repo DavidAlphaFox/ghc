@@ -61,7 +61,7 @@ Task *my_task;
 /* -----------------------------------------------------------------------------
  * Rest of the Task API
  * -------------------------------------------------------------------------- */
-
+//初始化任务管理器
 void
 initTaskManager (void)
 {
@@ -202,14 +202,14 @@ static Task*
 newTask (rtsBool worker)
 {
     Task *task;
-
+//使用CPU CacheLine对齐的方式分配task数据结构
 #define ROUND_TO_CACHE_LINE(x) ((((x)+63) / 64) * 64)
     task = stgMallocBytes(ROUND_TO_CACHE_LINE(sizeof(Task)), "newTask");
 
     task->cap           = NULL;
-    task->worker        = worker;
-    task->stopped       = rtsFalse;
-    task->running_finalizers = rtsFalse;
+    task->worker        = worker;//是否是工作线程
+    task->stopped       = rtsFalse;//没有被停止
+    task->running_finalizers = rtsFalse;//没有被初始化
     task->n_spare_incalls = 0;
     task->spare_incalls = NULL;
     task->incall        = NULL;
@@ -217,13 +217,13 @@ newTask (rtsBool worker)
 #if defined(THREADED_RTS)
     initCondition(&task->cond);
     initMutex(&task->lock);
-    task->wakeup = rtsFalse;
+    task->wakeup = rtsFalse;//task没有没唤醒
 #endif
 
     task->next = NULL;
 
     ACQUIRE_LOCK(&all_tasks_mutex);
-
+//将自己放入task当中
     task->all_prev = NULL;
     task->all_next = all_tasks;
     if (all_tasks != NULL) {
@@ -411,7 +411,7 @@ workerTaskStop (Task *task)
 #endif
 
 #if defined(THREADED_RTS)
-
+//多线程的时候执行的线程入口
 static void OSThreadProcAttr
 workerStart(Task *task)
 {
@@ -421,7 +421,7 @@ workerStart(Task *task)
     ACQUIRE_LOCK(&task->lock);
     cap = task->cap;
     RELEASE_LOCK(&task->lock);
-
+//是否绑定CPU的亲缘性
     if (RtsFlags.ParFlags.setAffinity) {
         setThreadAffinity(cap->no, n_capabilities);
     }
@@ -436,7 +436,7 @@ workerStart(Task *task)
 
     scheduleWorker(cap,task);
 }
-
+//创建系统级别的线程
 void
 startWorkerTask (Capability *cap)
 {
@@ -469,7 +469,7 @@ startWorkerTask (Capability *cap)
   }
 
   debugTrace(DEBUG_sched, "new worker task (taskCount: %d)", taskCount);
-
+//任务关联的系统级线程的ID
   task->id = tid;
 
   // ok, finished with the Task struct.

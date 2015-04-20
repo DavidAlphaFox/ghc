@@ -174,7 +174,7 @@ static void deleteThread_(Capability *cap, StgTSO *tso);
       * stack overflow
 
    ------------------------------------------------------------------------ */
-
+//主要调度函数
 static Capability *
 schedule (Capability *initialCapability, Task *task)
 {
@@ -259,7 +259,7 @@ schedule (Capability *initialCapability, Task *task)
         // case now.
         ASSERT(sched_state == SCHED_SHUTTING_DOWN);
         // fall through
-
+//让scheduler退出
     case SCHED_SHUTTING_DOWN:
         debugTrace(DEBUG_sched, "SCHED_SHUTTING_DOWN");
         // If we are a worker, just exit.  If we're a bound thread
@@ -272,13 +272,13 @@ schedule (Capability *initialCapability, Task *task)
     default:
         barf("sched_state: %d", sched_state);
     }
-
+//scheduler找到一个工作
     scheduleFindWork(&cap);
 
     /* work pushing, currently relevant only for THREADED_RTS:
        (pushes threads, wakes up idle capabilities for stealing) */
     schedulePushWork(cap,task);
-
+//死锁检查
     scheduleDetectDeadlock(&cap,task);
 
     // Normally, the only way we can get here with no threads to
@@ -2389,7 +2389,7 @@ scheduleWaitThread (StgTSO* tso, /*[out]*/HaskellObj* ret, Capability **pcap)
 /* ----------------------------------------------------------------------------
  * Starting Tasks
  * ------------------------------------------------------------------------- */
-
+//Task执行的主体函数
 #if defined(THREADED_RTS)
 void scheduleWorker (Capability *cap, Task *task)
 {
