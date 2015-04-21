@@ -77,7 +77,8 @@ typedef union {
  * file descriptor if the thread is waiting on I/O) in the block_info
  * field.
  */
-
+//线程状态结构体，用来保存当前线程的状态
+//这里的线程状态应当为绿线程的状态
 typedef struct StgTSO_ {
     StgHeader               header;
 
