@@ -259,6 +259,8 @@ bracket
 bracket before after thing =
   mask $ \restore -> do
     a <- before
+    -- 执行中间的过程的时候，不再屏蔽异常
+    -- 出现异常或者正常运行结束后再运行after
     r <- restore (thing a) `onException` after a
     _ <- after a
     return r
